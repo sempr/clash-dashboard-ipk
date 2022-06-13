@@ -1,0 +1,25 @@
+name: Deploy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Dashboard code
+        uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: latest
+      - name: Setup Nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: "17.x"
+          cache: pnpm
+      - name: Install package and build
+        run: |
+          pnpm install
+          pnpm build
+      - name: Build IPK
+        run: |
+          mkdir -p root/www/clash/
+          cp -r dist/* root/www/clash/
+          tree root/
