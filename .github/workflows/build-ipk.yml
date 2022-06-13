@@ -24,6 +24,44 @@ jobs:
           pnpm build
       - name: Build IPK
         run: |
-          mkdir -p root/www/clash/
-          cp -r dist/* root/www/clash/
-          tree root/
+          mkdir -p control
+          PKG_NAME="clash-dashboard"
+          TAG_NAME=$(date +%Y%m%d%H%M)
+
+          cat <<EOF >control/control
+          Package: ${PKG_NAME}
+          Version: 1.0-${TAG_NAME}
+          SourceName: ${PKG_NAME}
+          Architecture: x86_64
+          Description:  ${PKG_NAME}
+          EOF
+
+          pushd control
+          tar cvzf ../control.tar.gz ./*
+          popd
+
+          mkdir -p data/www
+          cp -r dist data/www/clash
+
+          pushd data
+          tar cvzf ../data.tar.gz ./*
+          popd
+
+          echo 2.0 >debian-binary
+          tar cvzf ${PKG_NAME}_1.0-${TAG_NAME}.ipk ./control.tar.gz ./data.tar.gz ./debian-binary
+          rm -rf control control.tar.gz data.tar.gz data debian-binary
+          mkdir -p output
+          mv ${PKG_NAME} output
+          echo "NEED_PUB=1" >> $GITHUB_ENV
+      - if: ${{ env.NEED_PUB == '1' }}
+        name: Release and upload assets
+        uses: softprops/action-gh-release@v0.1.6
+        with:
+          name: ${{ env.RELEASE_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+          files: |
+            output/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
