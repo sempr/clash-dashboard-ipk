@@ -9,18 +9,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: Dreamacro/clash-dashboard
-      - uses: pnpm/action-setup@v2
-        with:
-          version: latest
-      - name: Setup Nodejs
-        uses: actions/setup-node@v3
-        with:
-          node-version: "17.x"
-          cache: pnpm
-      - name: Install package and build
-        run: |
-          pnpm install
-          pnpm build
       - name: Check Commit ID
         run: |
           COMMIT_ID=$(git log --format="%H" -n 1)
@@ -36,6 +24,21 @@ jobs:
           else
             echo "NEED_PUB=1" >> $GITHUB_ENV
           fi
+      - uses: pnpm/action-setup@v2
+        if: ${{ env.NEED_PUB == '1' }}
+        with:
+          version: latest
+      - name: Setup Nodejs
+        if: ${{ env.NEED_PUB == '1' }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: "17.x"
+          cache: pnpm
+      - name: Install package and build
+        if: ${{ env.NEED_PUB == '1' }}
+        run: |
+          pnpm install
+          pnpm build
       - name: Build IPK
         if: ${{ env.NEED_PUB == '1' }}
         run: |
