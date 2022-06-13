@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Checkout Dashboard code
         uses: actions/checkout@v3
+        with:
+          repository: Dreamacro/clash-dashboard
       - uses: pnpm/action-setup@v2
         with:
           version: latest
