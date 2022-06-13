@@ -1,5 +1,4 @@
 name: Deploy
-
 on: [push]
 
 jobs:
@@ -22,11 +21,29 @@ jobs:
         run: |
           pnpm install
           pnpm build
-      - name: Build IPK
+      - name: Check Commit ID
         run: |
+          COMMIT_ID=$(git log --format="%H" -n 1)
+          echo $COMMIT_ID > commit.txt
+          echo "COMMIT_ID=${COMMIT_ID}" >> $GITHUB_ENV
+          OLD_URL=$(curl -fsSL https://github.com/sempr/clash-dashboard-ipk/releases/latest | grep "commit.txt"| grep href | awk -F'"' '{print $2}')
+          if [ "$OLD_URL" -ne "" ]; then
+            curl -fsSL -o old_commit.txt https://github.com/$OLD_URL
+          fi
+          MSG=$(diff commit.txt old_commit.txt >/dev/null 2>&1; echo $?)
+          if [ "$MSG" -eq "0" ];then
+            echo "NEED_PUB=0" >> $GITHUB_ENV
+          else
+            echo "NEED_PUB=1" >> $GITHUB_ENV
+          fi
+      - name: Build IPK
+        if: ${{ env.NEED_PUB == '1' }}
+        run: |
+          mkdir -p output
+          cp commit.txt output/
           mkdir -p control
           PKG_NAME="clash-dashboard"
-          TAG_NAME=$(date +%Y%m%d%H%M)
+          TAG_NAME=$(date +%Y%m%d%H%M)-${COMMIT_ID}
 
           cat <<EOF >control/control
           Package: ${PKG_NAME}
