@@ -53,6 +53,8 @@ jobs:
           mkdir -p output
           mv ${PKG_NAME}_1.0-${TAG_NAME}.ipk output
           echo "NEED_PUB=1" >> $GITHUB_ENV
+          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
+          echo "RELEASE_NAME=Released on ${TAG_NAME}" >> $GITHUB_ENV
       - if: ${{ env.NEED_PUB == '1' }}
         name: Release and upload assets
         uses: softprops/action-gh-release@v0.1.6
