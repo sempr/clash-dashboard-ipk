@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "17.x"
-          cache: pnpm
+          # cache: pnpm
       - name: Install package and build
         if: ${{ env.NEED_PUB == '1' }}
         run: |
