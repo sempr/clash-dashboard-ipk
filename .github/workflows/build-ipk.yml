@@ -15,7 +15,7 @@ jobs:
           echo $COMMIT_ID > commit.txt
           echo "COMMIT_ID=${COMMIT_ID}" >> $GITHUB_ENV
           OLD_URL=$(curl -fsSL https://github.com/sempr/clash-dashboard-ipk/releases/latest | grep "commit.txt"| grep href | awk -F'"' '{print $2}')
-          if [ "$OLD_URL" -ne "" ]; then
+          if [ "$OLD_URL" != "" ]; then
             curl -fsSL -o old_commit.txt https://github.com/$OLD_URL
           fi
           MSG=$(diff commit.txt old_commit.txt >/dev/null 2>&1; echo $?)
